@@ -5,10 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
-)
-
-const (
-	DATA_LENGTH = 1024
+	"sipt/UDPSendTool/static"
 )
 
 type FileOp struct {
@@ -35,7 +32,7 @@ func (this *FileOp) ReadFile(fileName string) {
 	var n int
 	for {
 		//引用传递，所以每次创建一个新的
-		buf := make([]byte, DATA_LENGTH)
+		buf := make([]byte, static.PACKAGE_SIZE)
 		n, err = r.Read(buf)
 		if err != nil && err != io.EOF {
 			panic(err)
@@ -54,6 +51,7 @@ func (this *FileOp) ReadFile(fileName string) {
  */
 func (this *FileOp) WriteFile(fileName string) {
 	_, err := os.Stat(fileName)
+	fmt.Println(fileName)
 	//查看文件名是否存在
 	if err == nil || os.IsExist(err) {
 		//err = os.Remove(fileName)

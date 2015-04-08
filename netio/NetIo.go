@@ -6,19 +6,20 @@ import (
 )
 
 type NetIo struct {
-	SendData  chan []byte
-	ReadData  chan []byte
-	SendIp    [4]byte
-	ListenIp  [4]byte
-	Port      int
-	IsWriting bool
+	SendData   chan []byte
+	ReadData   chan []byte
+	SendIp     [4]byte
+	ListenIp   [4]byte
+	SendToPort int
+	ListenPort int
+	IsWriting  bool
 	// fileOp    *io.FileOp
 }
 
 func (this *NetIo) Send() {
 	socket, err := net.DialUDP("udp4", nil, &net.UDPAddr{
 		IP:   net.IPv4(this.SendIp[0], this.SendIp[1], this.SendIp[2], this.SendIp[3]),
-		Port: this.Port,
+		Port: this.SendToPort,
 	})
 	if err != nil {
 		fmt.Println("连接失败！", err)
@@ -28,6 +29,7 @@ func (this *NetIo) Send() {
 	for {
 		//发送数据
 		senddata := <-this.SendData
+		fmt.Println(string(senddata))
 		_, err = socket.Write(senddata)
 		if err != nil {
 			fmt.Println("发送数据失败!", err)
@@ -44,7 +46,7 @@ func (this *NetIo) Listener() {
 	//创建监听
 	socket, err := net.ListenUDP("udp4", &net.UDPAddr{
 		IP:   net.IPv4(0, 0, 0, 0),
-		Port: this.Port,
+		Port: this.ListenPort,
 	})
 	if err != nil {
 		fmt.Println("监听失败", err)

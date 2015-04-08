@@ -1,8 +1,8 @@
 package service
 
 import (
-	"demo/client/io"
-	"demo/client/netio"
+	"sipt/UDPSendTool/io"
+	"sipt/UDPSendTool/netio"
 )
 
 type IDataService interface {
