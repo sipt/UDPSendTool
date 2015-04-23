@@ -1,5 +1,6 @@
 package io
 
+//BUNYWAAALXMpVGYS
 import (
 	"fmt"
 	"os"
@@ -8,6 +9,9 @@ import (
 	"strings"
 )
 
+/*
+	通过文件全路径名获取文件信息
+*/
 func GetFileInfo(fileName string) *MyFileInfo {
 	fmt.Println("开始获取要发送文件的信息。。。")
 
@@ -30,6 +34,7 @@ func GetFileInfo(fileName string) *MyFileInfo {
 	return myFileInfo
 }
 
+//获取数字位数
 func GetNumberLength(number int64) int64 {
 	var count int64
 	count = 0
@@ -42,6 +47,7 @@ func GetNumberLength(number int64) int64 {
 	return count
 }
 
+//通过文件信息的字串还原对象
 func GetFileInfoByArr(str string) *MyFileInfo {
 	myFileInfo := &MyFileInfo{}
 	args := strings.Split(str, "{:}")
@@ -77,6 +83,7 @@ type MyFileInfo struct {
 	PackageNumberLength int64
 }
 
+//格式化对象为字串
 func (this *MyFileInfo) ToString() string {
 	var result string
 	result = "title{:}" + "filesize=" + strconv.FormatInt(this.FileSize, 10) + "{:}" + "filename=" + this.FileName + "{:}" + "packagecount=" + strconv.FormatInt(this.PackageCount, 10) + "{:}" + "packagenumberlength=" + strconv.FormatInt(this.PackageNumberLength, 10)
