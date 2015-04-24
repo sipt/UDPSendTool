@@ -8,7 +8,7 @@ import (
 func DealWithError(info string, err error) bool {
 	if err != nil {
 		fmt.Println(info)
-		return false
+		return true
 	}
-	return true
+	return false
 }

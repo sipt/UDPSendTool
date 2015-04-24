@@ -6,13 +6,14 @@ import (
 )
 
 type NetIo struct {
-	SendData   chan []byte
-	ReadData   chan []byte
-	SendIp     [4]byte
-	ListenIp   [4]byte
-	SendToPort int
-	ListenPort int
-	IsWriting  bool
+	SendData    chan []byte
+	ReadData    chan []byte
+	SendIp      [4]byte
+	ListenIp    [4]byte
+	SendToPort  int
+	ListenPort  int
+	IsWriting   bool
+	ReadEndChan chan string
 	// fileOp    *io.FileOp
 }
 
@@ -29,7 +30,6 @@ func (this *NetIo) Send() {
 	for {
 		//发送数据
 		senddata := <-this.SendData
-		fmt.Println(string(senddata))
 		_, err = socket.Write(senddata)
 		if err != nil {
 			fmt.Println("发送数据失败!", err)
@@ -42,6 +42,7 @@ func (this *NetIo) Send() {
 }
 
 func (this *NetIo) Listener() {
+	this.ReadEndChan = make(chan string)
 	this.IsWriting = false
 	//创建监听
 	socket, err := net.ListenUDP("udp4", &net.UDPAddr{
@@ -55,16 +56,17 @@ func (this *NetIo) Listener() {
 	defer socket.Close()
 	for {
 		//读取数据
-		data := make([]byte, 1024)
+		data := make([]byte, 2048)
 		length, _, err := socket.ReadFromUDP(data)
 		if err != nil {
 			fmt.Println("读取数据失败！", err)
 			continue
 		}
-		fmt.Println(data[0])
-		// if this.IsWriting {
-		// 	go this.fileOp.WriteFile("D:\\2.png")
-		// }
-		this.ReadData <- data[:length]
+		fmt.Println("--------读入数据长度:", length)
+		if length == 0 {
+			this.ReadEndChan <- "END"
+		} else {
+			this.ReadData <- data[:length]
+		}
 	}
 }

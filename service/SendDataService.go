@@ -29,6 +29,7 @@ func (this *SendDataService) SetFileName(fileName string) {
 }
 
 func (this *SendDataService) Service(netIo *netio.NetIo, fileOp *io.FileOp) {
+	this.SendDataList = make(map[int64][]byte)
 	//启动发送协程
 	go netIo.Send()
 	//启动监听协程
@@ -44,25 +45,38 @@ func (this *SendDataService) Service(netIo *netio.NetIo, fileOp *io.FileOp) {
 		temp := <-fileOp.ReadData
 
 		if temp == nil {
+			myTimer := time.NewTimer(time.Second * 2)
+			sendEndFlag := false
 			//第一遍数据发送完毕，开发把客户端示收到数据重发
 			for {
+				<-myTimer.C
+				myTimer.Reset(time.Second * 2)
 				//查看是否存在重发数据
 				if len(this.SendDataList) > 0 {
 					//开始重发操作
 					for _, value := range this.SendDataList {
 						netIo.SendData <- value
+						if value != nil {
+							fmt.Println("发送数据报->", string(value[:this.SendFileInfo.PackageNumberLength]), "号包，包长为：", len(value))
+						}
 					}
 				} else {
-					break
+					if sendEndFlag {
+						return
+					} else {
+						//传给客户文件传输结束标记
+						this.SendDataList[-1] = nil
+						sendEndFlag = true
+					}
 				}
 			}
-			//传给客户文件传输结束标记
-			netIo.SendData <- nil
-			break
 		}
 		var bytes []byte
 		//格式化计数到指定位数
 		bytes = []byte(FormatString(this.Count, this.SendFileInfo.PackageNumberLength))
+
+		fmt.Println("发送数据报->", this.Count, "号包，包长为：", len(bytes))
+
 		//在后面补上数据
 		bytes = append(bytes, temp...)
 		//将数据保存入map队列
